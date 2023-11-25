@@ -12,7 +12,7 @@ int main(int argc, char** argv)
   // - 1 (moves randomly)
   // - 2 (tries to always approach the goal)
   // - 3 (uses the proposed algorithm)
-  Game game(argc, argv, my_name, 1);    // to play as player 1 against level 1 AI
+  Game game(argc, argv, my_name, 0);    // to play as player 1 against level 1 AI
   //Game game(argc, argv, my_name, -2);    // to play as player 2 against level 2 AI
 
   Input input;
