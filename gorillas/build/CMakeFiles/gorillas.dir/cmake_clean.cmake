@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/gorillas.dir/gorillaai.cpp.o"
   "CMakeFiles/gorillas.dir/gorillas.cpp.o"
   "gorillas"
   "gorillas.pdb"

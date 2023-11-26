@@ -6,9 +6,13 @@
 
 #IncludeRegexTransform: 
 
+/home/ecn/ARPRO/gorillas/gorillaai.h
+
 /home/ecn/ARPRO/gorillas/gorillas.cpp
 duels/gorillas/game.h
 -
+gorillaai.h
+/home/ecn/ARPRO/gorillas/gorillaai.h
 
 /opt/duels/include/duels/client.h
 iostream

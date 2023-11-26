@@ -1,1 +1,1 @@
-/usr/bin/c++  -g  -rdynamic CMakeFiles/gorillas.dir/gorillas.cpp.o  -o gorillas  -lzmq /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.6.2 
+/usr/bin/g++  -g  -rdynamic CMakeFiles/gorillas.dir/gorillas.cpp.o CMakeFiles/gorillas.dir/gorillaai.cpp.o  -o gorillas  -lzmq /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.6.2 

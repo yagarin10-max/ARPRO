@@ -123,6 +123,33 @@ gorillas/fast:
 	$(MAKE) -f CMakeFiles/gorillas.dir/build.make CMakeFiles/gorillas.dir/build
 .PHONY : gorillas/fast
 
+gorillaai.o: gorillaai.cpp.o
+
+.PHONY : gorillaai.o
+
+# target to build an object file
+gorillaai.cpp.o:
+	$(MAKE) -f CMakeFiles/gorillas.dir/build.make CMakeFiles/gorillas.dir/gorillaai.cpp.o
+.PHONY : gorillaai.cpp.o
+
+gorillaai.i: gorillaai.cpp.i
+
+.PHONY : gorillaai.i
+
+# target to preprocess a source file
+gorillaai.cpp.i:
+	$(MAKE) -f CMakeFiles/gorillas.dir/build.make CMakeFiles/gorillas.dir/gorillaai.cpp.i
+.PHONY : gorillaai.cpp.i
+
+gorillaai.s: gorillaai.cpp.s
+
+.PHONY : gorillaai.s
+
+# target to generate assembly for a file
+gorillaai.cpp.s:
+	$(MAKE) -f CMakeFiles/gorillas.dir/build.make CMakeFiles/gorillas.dir/gorillaai.cpp.s
+.PHONY : gorillaai.cpp.s
+
 gorillas.o: gorillas.cpp.o
 
 .PHONY : gorillas.o
@@ -159,6 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... gorillas"
+	@echo "... gorillaai.o"
+	@echo "... gorillaai.i"
+	@echo "... gorillaai.s"
 	@echo "... gorillas.o"
 	@echo "... gorillas.i"
 	@echo "... gorillas.s"

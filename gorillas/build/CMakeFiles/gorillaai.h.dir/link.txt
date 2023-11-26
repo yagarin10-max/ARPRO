@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgorillaai.h.a  CMakeFiles/gorillaai.h.dir/gorillaai.cpp.o
+/usr/bin/ranlib libgorillaai.h.a
