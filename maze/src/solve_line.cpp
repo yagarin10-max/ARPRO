@@ -10,17 +10,40 @@ class Position : public Point
     typedef std::unique_ptr<Position> PositionPtr;
 
 public:
+    int distance;
     // constructor from coordinates
     Position(int _x, int _y) : Point(_x, _y) {}
 
     // constructor from base ecn::Point
     Position(ecn::Point p) : Point(p.x, p.y) {}
 
+    Position(int _x, int _y, int _distance)
+    {
+        x = _x;
+        y = _y;
+        distance = _distance;
+    }
+
     int distToParent()
     {
         // in cell-based motion, the distance to the parent is always 1
-        return 1;
+        return distance;
     }
+
+    bool is_line(int x, int y)
+    {
+        //Corners,Intersections and Dead end
+        if((Position::maze.isFree(x+1,y) && Position::maze.isFree(x-1,y)) &&
+           (!Position::maze.isFree(x,y+1) && !Position::maze.isFree(x,y-1)))
+                return true;
+        else if((!Position::maze.isFree(x+1,y) && !Position::maze.isFree(x-1,y)) &&
+                (Position::maze.isFree(x,y+1) && Position::maze.isFree(x,y-1)))
+                return true;
+        else
+            return false;
+
+    }
+
 
     std::vector<PositionPtr> children()
     {
@@ -32,13 +55,19 @@ public:
         int dy[4] = {-1, 1, 0, 0};
 
         for(int i = 0; i < 4; ++i) {
-            int newX = x + dx[i];
-            int newY = y + dy[i];
-
-            // Check if the new position is valid
+            int localDistance = 1;
+            int newX = x + dx[i], newY = y + dy[i];
             if(Position::maze.isFree(newX, newY)) {
-                generated.push_back(std::make_unique<Position>(newX, newY));
+                while (is_line(newX, newY)){
+                    newX += dx[i];
+                    newY += dy[i];
+                    localDistance++;
+                }
+                generated.push_back(std::make_unique<Position>(newX, newY, localDistance));
             }
+            std::cout << localDistance << std::endl;
+            // Create a new Position only if it's different from the current
+
         }
         return generated;
     }
@@ -64,7 +93,7 @@ int main( int argc, char **argv )
     ecn::Astar(start, goal);
 
     // save final image
-    Position::maze.saveSolution("cell");
+    Position::maze.saveSolution("line");
     cv::waitKey(0);
 
 }
