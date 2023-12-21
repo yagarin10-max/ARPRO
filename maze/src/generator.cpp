@@ -4,237 +4,242 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include <maze.h>
 
-using namespace ecn;
+#include <maze.h>//3
+#include <point.h>//3
+using namespace ecn;//3
 
-struct Node
+typedef struct
 {
-        int x, y; //Node position - little waste of memory, but it allows faster generation
-        Node *parent; //Pointer to parent node
-        char c; //Character to be displayed
-        char dirs; //Directions that still haven't been explored
-};
+    int x, y; //Node position - little waste of memory, but it allows faster generation
+    void *parent; //Pointer to parent node
+    char c; //Character to be displayed
+    char dirs; //Directions that still haven't been explored
+} Node;
 
 Node *nodes; //Nodes array
 int width, height; //Maze dimensions
-int cnt;
+int cnt=0;//3
 
 int init( )
 {
-        int i, j;
-        Node *n;
+    int i, j;
+    Node *n;
 
-        //Allocate memory for maze
-        nodes = (Node *)calloc( width * height, sizeof( Node ) );
-        if ( nodes == NULL ) return 1;
+    //Allocate memory for maze
+    nodes = (Node*)calloc( width * height, sizeof( Node ) );
+    if ( nodes == NULL ) return 1;
 
-        //Setup crucial nodes
-        for ( i = 0; i < width; i++ )
+    //Setup crucial nodes
+    for ( i = 0; i < width; i++ )
+    {
+        for ( j = 0; j < height; j++ )
         {
-                for ( j = 0; j < height; j++ )
-                {
-                        n = nodes + i + j * width;
-                        if ( i * j % 2 )
-                        {
-                                n->x = i;
-                                n->y = j;
-                                n->dirs = 15; //Assume that all directions can be explored (4 youngest bits set)
-                                n->c = ' ';
-                        }
-                        else n->c = '#'; //Add walls between nodes
-                }
+            n = nodes + i + j * width;
+            if ( i * j % 2 )
+            {
+                n->x = i;
+                n->y = j;
+                n->dirs = 15; //Assume that all directions can be explored (4 youngest bits set)
+                n->c = ' ';
+                cnt++;//3
+            }
+            else n->c = '#'; //Add walls between nodes
         }
-        return 0;
+    }
+    return 0;
 }
 
 Node *link( Node *n )
 {
-        //Connects node to random neighbor (if possible) and returns
-        //address of next node that should be visited
+    //Connects node to random neighbor (if possible) and returns
+    //address of next node that should be visited
 
-        int x, y;
-        char dir;
-        Node *dest;
+    int x, y;
+    char dir;
+    Node *dest;
 
-        //Nothing can be done if null pointer is given - return
-        if ( n == NULL ) return NULL;
+    //Nothing can be done if null pointer is given - return
+    if ( n == NULL ) return NULL;
 
-        //While there are directions still unexplored
-        while ( n->dirs )
+    //While there are directions still unexplored
+    while ( n->dirs )
+    {
+        //Randomly pick one direction
+        dir = ( 1 << ( rand( ) % 4 ) );
+
+        //If it has already been explored - try again
+        if ( ~n->dirs & dir ) continue;
+
+        //Mark direction as explored
+        n->dirs &= ~dir;
+
+        //Depending on chosen direction
+        switch ( dir )
         {
-                //Randomly pick one direction
-                dir = ( 1 << ( rand( ) % 4 ) );
-
-                //If it has already been explored - try again
-                if ( ~n->dirs & dir ) continue;
-
-                //Mark direction as explored
-                n->dirs &= ~dir;
-
-                //Depending on chosen direction
-                switch ( dir )
+            //Check if it's possible to go right
+            case 1:
+                if ( n->x + 2 < width )
                 {
-                        //Check if it's possible to go right
-                        case 1:
-                                if ( n->x + 2 < width )
-                                {
-                                        x = n->x + 2;
-                                        y = n->y;
-                                }
-                                else continue;
-                                break;
-
-                        //Check if it's possible to go down
-                        case 2:
-                                if ( n->y + 2 < height )
-                                {
-                                        x = n->x;
-                                        y = n->y + 2;
-                                }
-                                else continue;
-                                break;
-
-                        //Check if it's possible to go left
-                        case 4:
-                                if ( n->x - 2 >= 0 )
-                                {
-                                        x = n->x - 2;
-                                        y = n->y;
-                                }
-                                else continue;
-                                break;
-
-                        //Check if it's possible to go up
-                        case 8:
-                                if ( n->y - 2 >= 0 )
-                                {
-                                        x = n->x;
-                                        y = n->y - 2;
-                                }
-                                else continue;
-                                break;
+                    x = n->x + 2;
+                    y = n->y;
                 }
+                else continue;
+                break;
 
-                //Get destination node into pointer (makes things a tiny bit faster)
-                dest = nodes + x + y * width;
-
-                //Make sure that destination node is not a wall
-                if ( dest->c == ' ' )
+            //Check if it's possible to go down
+            case 2:
+                if ( n->y + 2 < height )
                 {
-                        //If destination is a linked node already - abort
-                        if ( dest->parent != NULL ) continue;
-
-                        //Otherwise, adopt node
-                        dest->parent = n;
-
-                        //Remove wall between nodes
-                        nodes[n->x + ( x - n->x ) / 2 + ( n->y + ( y - n->y ) / 2 ) * width].c = ' ';
-
-                        //Return address of the child node
-                        return dest;
+                    x = n->x;
+                    y = n->y + 2;
                 }
+                else continue;
+                break;
+
+            //Check if it's possible to go left
+            case 4:
+                if ( n->x - 2 >= 0 )
+                {
+                    x = n->x - 2;
+                    y = n->y;
+                }
+                else continue;
+                break;
+
+            //Check if it's possible to go up
+            case 8:
+                if ( n->y - 2 >= 0 )
+                {
+                    x = n->x;
+                    y = n->y - 2;
+                }
+                else continue;
+                break;
         }
 
-        //If nothing more can be done here - return parent's address
-        return n->parent;
+        //Get destination node into pointer (makes things a tiny bit faster)
+        dest = nodes + x + y * width;
+
+        //Make sure that destination node is not a wall
+        if ( dest->c == ' ' )
+        {
+            //If destination is a linked node already - abort
+            if ( dest->parent != NULL ) continue;
+
+            //Otherwise, adopt node
+            dest->parent = n;
+
+            //Remove wall between nodes
+            nodes[n->x + ( x - n->x ) / 2 + ( n->y + ( y - n->y ) / 2 ) * width].c = ' ';
+            cnt++;//3
+
+            //Return address of the child node
+            return dest;
+        }
+    }
+
+    //If nothing more can be done here - return parent's address
+    return (Node*)n->parent;// 3 cast void* to Node*
 }
 
 void draw( )
 {
-        int i, j;
+    int i, j;
 
-        //Outputs maze to terminal - nothing special
-        for ( i = 0; i < height; i++ )
+    //Outputs maze to terminal - nothing special
+    for ( i = 0; i < height; i++ )
+    {
+        for ( j = 0; j < width; j++ )
         {
-                for ( j = 0; j < width; j++ )
-                {
-                        printf( "%c", nodes[j + i * width].c );
-                }
-                printf( "\n" );
+            printf( "%c", nodes[j + i * width].c );
         }
+        printf( "\n" );
+    }
 }
 
 int main( int argc, char **argv )
 {
-        Node *start, *last;
+    Node *start, *last;
 
-        //Check argument count
-        if ( argc < 3 )
-        {
-                fprintf( stderr, "%s: please specify maze dimensions!\n", argv[0] );
-                exit( 1 );
+    //Check argument count
+    if ( argc < 3 )
+    {
+        fprintf( stderr, "%s: please specify maze dimensions!\n", argv[0] );
+        exit( 1 );
+    }
+
+    //Read maze dimensions from command line arguments
+    if ( sscanf( argv[1], "%d", &width ) + sscanf( argv[2], "%d", &height ) < 2 )
+    {
+        fprintf( stderr, "%s: invalid maze size value!\n", argv[0] );
+        exit( 1 );
+    }
+
+    //Allow only odd dimensions
+    if ( !( width % 2 ) || !( height % 2 ) )
+    {
+        fprintf( stderr, "%s: dimensions must be odd!\n", argv[0] );
+        exit( 1 );
+    }
+
+    //Do not allow negative dimensions
+    if ( width <= 0 || height <= 0 )
+    {
+        fprintf( stderr, "%s: dimensions must be greater than 0!\n", argv[0] );
+        exit( 1 );
+    }
+
+    //Seed random generator
+    srand( time( NULL ) );
+
+    //Initialize maze
+    if ( init( ) )
+    {
+        fprintf( stderr, "%s: out of memory!\n", argv[0] );
+        exit( 1 );
+    }
+
+    //Setup start node
+    start = nodes + 1 + width;
+    start->parent = start;
+    last = start;
+
+    //Connect nodes until start node is reached and can't be left
+    while ( ( last = link( last ) ) != start );
+
+    // build a non-perfect maze
+    // Read and validate the percentage for additional paths
+    double percent;
+    if (sscanf(argv[3], "%lf", &percent) != 1 || percent < 0 || percent > 100) {
+        fprintf(stderr, "%s: Invalid percentage value!\n", argv[0]);
+        exit(1);
+    }
+
+    // Calculate the number of additional paths to create
+    int additionalPaths = static_cast<int>((width - 2) * (height - 2) * (percent / 100.0) - cnt);
+
+    // Randomly create additional paths in the maze
+    while (additionalPaths > 0) {
+        int randomIndex = rand() % (width * height);
+        Node &node = nodes[randomIndex];
+
+        // Ensure the selected node is a wall and not at the border
+        if (node.x > 0 && node.x < width - 1 && node.y > 0 && node.y < height - 1 && node.c == '#') {
+            node.c = ' ';
+            additionalPaths--;
         }
+    }
 
-        //Read maze dimensions from command line arguments
-        if ( sscanf( argv[1], "%d", &width ) + sscanf( argv[2], "%d", &height ) < 2 )
-        {
-                fprintf( stderr, "%s: invalid maze size value!\n", argv[0] );
-                exit( 1 );
-        }
-
-        //Allow only odd dimensions
-        if ( !( width % 2 ) || !( height % 2 ) )
-        {
-                fprintf( stderr, "%s: dimensions must be odd!\n", argv[0] );
-                exit( 1 );
-        }
-
-        //Do not allow negative dimensions
-        if ( width <= 0 || height <= 0 )
-        {
-                fprintf( stderr, "%s: dimensions must be greater than 0!\n", argv[0] );
-                exit( 1 );
-        }
-
-        //Seed random generator
-        srand( time( NULL ) );
-
-        //Initialize maze
-        if ( init( ) )
-        {
-                fprintf( stderr, "%s: out of memory!\n", argv[0] );
-                exit( 1 );
-        }
-
-        //Setup start node
-        start = nodes + 1 + width;
-        start->parent = start;
-        last = start;
-
-        //Connect nodes until start node is reached and can't be left
-        while ( ( last = link( last ) ) != start );
-
-        double percent;
-        sscanf(argv[3],"%lf",&percent);//takes a third argument in double
-        if(percent<0||percent>100)//percent should be in this range
-        {
-            fprintf( stderr, "%s: percent must be in the specific part\n", argv[0] );
-            exit( 1 );
-        }
-        double rest=(width-2)*(height-2)-cnt;
-        rest=(int)rest*(percent/100);
-        while(rest){
-            int tmp=rand()%(width*height-1);
-            if(tmp/width==0||tmp%width==0||tmp%width==width-1||tmp/width>=height-1){
-                continue;
+    // Save the final maze layout
+    Maze maze(height, width);
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            if (nodes[i + j * width].c == ' ') {
+                maze.dig(i, j);
             }
-            if(nodes[tmp].c=='#'){
-                nodes[tmp].c=' ';
-                rest--;
-                cnt++;
-            }
         }
+    }
+    maze.save();
 
-
-        Maze maze(height,width);
-        for(int i=0;i<width;i++){
-            for(int j=0;j<height;j++){
-                Node *n = nodes + i + j * (width);
-                if(n->c == ' '){
-                    maze.dig(i,j);
-                }
-            }
-        }
-        maze.save();
 }
