@@ -18,7 +18,6 @@ public:
     int end_x=maze.end().x;
     int end_y=maze.end().y;
     // constructor from coordinates
-    //Position(int _x, int _y) : Point(_x, _y) {}
     Position(int _x,int _y, int _distance){
         x=_x;
         y=_y;
@@ -33,128 +32,56 @@ public:
         // in cell-based motion, the distance to the parent is always 1
         return distance;
     }
+    bool is_corridor(int _x,int _y,int &dx,int &dy){
+         bool isCorridor=false;
+         //int cnt=0;
 
-   bool is_corridor(int _x,int _y,int &a_x,int &a_y){
-        bool cor=false;
-        //int cnt=0;
+         if(dx&&(int)maze.isFree(_x+dx,_y)+(int)maze.isFree(_x,_y+1)+(int)maze.isFree(_x,_y-1)==1){
+             if(maze.isFree(_x,_y-1)){
+                 dx=0;
+                 dy=-1;
+             }
+             else if(maze.isFree(_x,_y+1)){
+                 dx=0;
+                 dy=1;
+             }
 
-        if(a_x&&(int)maze.isFree(_x+a_x,_y)+(int)maze.isFree(_x,_y+1)+(int)maze.isFree(_x,_y-1)==1){
-            if(maze.isFree(_x,_y-1)){
-                a_x=0;
-                a_y=-1;
-            }
-            else if(maze.isFree(_x,_y+1)){
-                a_x=0;
-                a_y=1;
-            }
+             isCorridor=true;
+         }
+         else if(dy&&(int)maze.isFree(_x,_y+dy)+(int)maze.isFree(_x+1,_y)+(int)maze.isFree(_x-1,_y)==1){
+             if(maze.isFree(_x-1,_y)){
+                 dx=-1;
+                 dy=0;
+             }
+             else if(maze.isFree(_x+1,_y)){
+                 dx=1;
+                 dy=0;
+             }
+             isCorridor=true;
+         }
 
-            cor=true;
-        }
-        else if(a_y&&(int)maze.isFree(_x,_y+a_y)+(int)maze.isFree(_x+1,_y)+(int)maze.isFree(_x-1,_y)==1){
-            if(maze.isFree(_x-1,_y)){
-                a_x=-1;
-                a_y=0;
-            }
-            else if(maze.isFree(_x+1,_y)){
-                a_x=1;
-                a_y=0;
-            }
-            cor=true;
-        }
-
-        return cor;
-    }
-
-
-  /*std::vector<PositionPtr> children()
-    {
-        // this method should return  all positions reachable from this one
-        std::vector<PositionPtr> generated;
-
-
-        int _x,_y;
-        int steps;
-
-        for(int i=0;i<4;i++){
-            _x=x+a_x[i];
-            _y=y+a_y[i];
-            steps=1;
-            if(maze.isFree(_x,_y)){
-                while(is_corridor(_x,_y,a_x[i],a_y[i])&&(_x!=goal_x||_y!=goal_y)){
-                        _x+=a_x[i];
-                        _y+=a_y[i];
-                        steps++;
-                }
-                generated.push_back(std::make_unique<Position>(_x,_y,steps));
-            }
-        }
-
-
-        return generated;
-    }*/
-    /*try*/
-   std::vector<PositionPtr> children()
-   {
-       // this method should return  all positions reachable from this one
-       std::vector<PositionPtr> generated;
-       int _x,_y;
-       int ax,ay;
-       int steps=1;
-
-       if(maze.isFree(x-1,y)){
-           ax=-1;
-           ay=0;
-           _x= x+ax;
-           _y= y+ay;
-           while(is_corridor(_x,_y,ax,ay) && (_x != end_x || _y!=end_y)){
-               _x += ax;
-               _y += ay;
-               steps++;
-           }
-           generated.push_back(std::make_unique<Position>(_x, _y, steps));
-       }
-
-       if(maze.isFree(x+1,y)){
-           ax=1;
-           ay=0;
-           _x= x+ax;
-           _y= y+ay;
-           while(is_corridor(_x,_y,ax,ay) && (_x != end_x || _y!=end_y)){
-               _x += ax;
-               _y += ay;
-               steps++;
-           }
-           generated.push_back(std::make_unique<Position>(_x, _y, steps));
-       }
-
-       if(maze.isFree(x,y-1)){
-           ax=0;
-           ay=-1;
-           _x= x+ax;
-           _y= y+ay;
-           while(is_corridor(_x,_y,ax,ay) && (_x != end_x || _y!=end_y)){
-               _x += ax;
-               _y += ay;
-               steps++;
-           }
-           generated.push_back(std::make_unique<Position>(_x, _y, steps));
-       }
-
-       if(maze.isFree(x,y+1)){
-           ax=0;
-           ay=1;
-           _x= x+ax;
-           _y= y+ay;
-           while(is_corridor(_x,_y,ax,ay) && (_x != end_x || _y!=end_y)){
-               _x += ax;
-               _y += ay;
-               steps++;
-           }
-           generated.push_back(std::make_unique<Position>(_x, _y, steps));
-       }
-       return generated;
+         return isCorridor;
    }
-    /*try_end*/
+
+
+    std::vector<PositionPtr> children() {
+        std::vector<PositionPtr> generated;
+        int dx[4] = {0, 0, -1, 1};
+        int dy[4] = {-1, 1, 0, 0};
+
+        for (int i = 0; i < 4; ++i) {
+            if (maze.isFree(x + dx[i], y + dy[i])) {
+                int _x = x + dx[i], _y = y + dy[i], steps = 1;
+                while (is_corridor(_x, _y, dx[i], dy[i]) && (_x != end_x || _y != end_y)) {
+                    _x += dx[i];
+                    _y += dy[i];
+                    steps++;
+                }
+                generated.push_back(std::make_unique<Position>(_x, _y, steps));
+            }
+        }
+        return generated;
+    }
 
     void show(bool closed,const Point &parent){
         int _x,_y;
@@ -239,7 +166,7 @@ int main( int argc, char **argv )
     ecn::Astar(start, goal);
 
     // save final image
-    Position::maze.saveSolution("101x201_corridor");
+    Position::maze.saveSolution("corridor");
     cv::waitKey(0);
 
 }

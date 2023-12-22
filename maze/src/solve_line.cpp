@@ -41,7 +41,6 @@ public:
                 return true;
         else
             return false;
-
     }
 
 
@@ -65,9 +64,6 @@ public:
                 }
                 generated.push_back(std::make_unique<Position>(newX, newY, localDistance));
             }
-            std::cout << localDistance << std::endl;
-            // Create a new Position only if it's different from the current
-
         }
         return generated;
     }
