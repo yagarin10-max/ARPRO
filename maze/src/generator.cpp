@@ -217,15 +217,16 @@ int main( int argc, char **argv )
     }
 
     // Calculate the number of additional paths to create
-    int additionalPaths = static_cast<int>((width - 2) * (height - 2) * (percent / 100.0) - cnt);
-
+    int additionalPaths = static_cast<int>(((width - 2) * (height - 2) - cnt) * (percent / 100.0));
     // Randomly create additional paths in the maze
     while (additionalPaths > 0) {
-        int randomIndex = rand() % (width * height);
+        int randomIndex = rand() % (width * height - 1);
         Node &node = nodes[randomIndex];
-
         // Ensure the selected node is a wall and not at the border
-        if (node.x > 0 && node.x < width - 1 && node.y > 0 && node.y < height - 1 && node.c == '#') {
+        if (randomIndex/width==0||randomIndex%width==0||randomIndex%width==width-1||randomIndex/width>=height-1) {
+            continue;
+        }
+        if (node.c == '#') {
             node.c = ' ';
             additionalPaths--;
         }
